@@ -22,7 +22,6 @@ public class ThirdPersonCamera : MonoBehaviour
 	void Start()
     {
         //follow = GameObject.FindWithTag("Follow").transform;
-        Debug.Log(follow);
 	}
 	
 	// Update is called once per frame
