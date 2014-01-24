@@ -4,13 +4,13 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace States
+namespace UnityFSM
 {
     public abstract class State
     {
         #region Fields
 
-        protected GameObject gameObject;
+        private FSM fsm;
 
         #endregion
 
@@ -24,18 +24,77 @@ namespace States
             }
         }
 
+        public State PreviousState
+        {
+            get
+            {
+                return fsm.PreviousState;
+            }
+        }
+
+        public float ActiveTime
+        {
+            get
+            {
+                return fsm.ActiveStateTime;
+            }
+        }
+
+        public Dictionary<Reason, Type> Transitions
+        {
+            get;
+            private set;
+        }
+
         #endregion
 
         #region Public Methods
 
-        public State(GameObject gameObject)
+        public State(FSM fsm)
         {
-            this.gameObject = gameObject;
+            this.Transitions = new Dictionary<Reason, Type>();
+
+            this.fsm = fsm;
+            gameObject = fsm.gameObject;
+            animation = gameObject.animation;
+            audio = gameObject.audio;
+            camera = gameObject.camera;
+            collider = gameObject.collider;
+            collider2D = gameObject.collider2D;
+            constantForce = gameObject.constantForce;
+            guiText = gameObject.guiText;
+            guiTexture = gameObject.guiTexture;
+            hingeJoint = gameObject.hingeJoint;
+            light = gameObject.light;
+            networkView = gameObject.networkView;
+            particleEmitter = gameObject.particleEmitter;
+            particleSystem = gameObject.particleSystem;
+            renderer = gameObject.renderer;
+            rigidbody = gameObject.rigidbody;
+            rigidbody2D = gameObject.rigidbody2D;
+            transform = gameObject.transform;
+            name = gameObject.name;
         }
 
         public override string ToString()
         {
             return Name;
+        }
+
+        #endregion
+
+        #region Protected Methods
+
+        protected void AddTransition<T>(Reason reason)
+        {
+            Type destStateType = typeof(T);
+            if (Transitions.ContainsKey(reason) && Transitions[reason] == destStateType)
+            {
+                Debug.Log("Error adding Transition.  Duplicate transition from State " + Name + " to " + destStateType.Name + " due to " + reason.ToString());
+                return;
+            }
+
+            Transitions.Add(reason, destStateType);
         }
 
         #endregion
@@ -48,7 +107,54 @@ namespace States
 
         #endregion
 
-        #region Unity Overridable Methods
+        #region Unity Variables
+
+        protected bool enabled
+        {
+            get
+            {
+                return fsm.enabled;
+            }
+            set
+            {
+                fsm.enabled = value;
+            }
+        }
+        protected Animation animation;
+        protected AudioSource audio;
+        protected Camera camera;
+        protected Collider collider;
+        protected Collider2D collider2D;
+        protected ConstantForce constantForce;
+        protected GameObject gameObject;
+        protected GUIText guiText;
+        protected GUITexture guiTexture;
+        protected HingeJoint hingeJoint;
+        protected Light light;
+        protected NetworkView networkView;
+        protected ParticleEmitter particleEmitter;
+        protected ParticleSystem particleSystem;
+        protected Renderer renderer;
+        protected Rigidbody rigidbody;
+        protected Rigidbody2D rigidbody2D;
+        protected string tag;
+        protected Transform transform;
+        protected HideFlags hideFlags
+        {
+            get
+            {
+                return gameObject.hideFlags;
+            }
+            set
+            {
+                gameObject.hideFlags = value;
+            }
+        }
+        protected string name;
+
+        #endregion
+    
+        #region Unity Messages
 
         public virtual void FixedUpdate() { }
 

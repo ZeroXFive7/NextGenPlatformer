@@ -13,21 +13,16 @@ public class ThirdPersonCamera : MonoBehaviour
     private float smooth;
     [SerializeField]
     private Transform follow;
+
     private Vector3 targetPosition;
 
     private Vector3 mForward = Vector3.forward;
     #endregion
-
-    // Use this for initialization
-	void Start()
-    {
-        //follow = GameObject.FindWithTag("Follow").transform;
-	}
-	
+    	
 	// Update is called once per frame
 	void Update()
     {
-        mForward = Quaternion.Euler(-Input.GetAxis("Camera Pitch") * 3.0f, Input.GetAxis("Camera Yaw") * 10.0f, 0.0f) * mForward;
+        mForward = Quaternion.Euler(-InputManager.CameraInput.x * 3.0f, InputManager.CameraInput.y * 10.0f, 0.0f) * mForward;
 	}
 
     void LateUpdate()
