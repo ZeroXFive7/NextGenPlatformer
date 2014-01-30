@@ -28,16 +28,15 @@ namespace HeroStates
             Debug.DrawRay(transform.position, SurfaceNormal, Color.yellow);
 
             Vector3 cameraForward = MathHelper.ProjectVectorToPlane(Hero.Camera.forward, SurfaceNormal).normalized;
+            Vector3 forwardProjection = MathHelper.ProjectVectorToPlane(Vector3.forward, SurfaceNormal).normalized;
 
-            Vector3 movementForward = (Quaternion.FromToRotation(Vector3.forward, cameraForward) * InputManager.MovementInput).normalized;
+            Vector3 movementForward = (Quaternion.FromToRotation(forwardProjection, cameraForward) * InputManager.MovementInput).normalized;
             movementForward = MathHelper.ProjectVectorToPlane(movementForward, SurfaceNormal).normalized;
-            Debug.DrawRay(transform.position, movementForward, Color.magenta);
 
             float speed = InputManager.MovementInput.sqrMagnitude;
             rigidbody.velocity = movementForward * speed * Hero.MaxSpeed;
             animator.SetFloat("Speed", speed);
 
-            Vector3 forwardProjection = MathHelper.ProjectVectorToPlane(Vector3.forward, SurfaceNormal).normalized;
             float rotationAngle = Vector3.Angle(forwardProjection, movementForward);
             rotationAngle *= (Vector3.Cross(forwardProjection, movementForward).y <= 0.0f) ? -1.0f : 1.0f;
 
