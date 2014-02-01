@@ -20,6 +20,7 @@ namespace HeroStates
         {
             AddTransition<Move>(IsCollidingBelow);
             AddTransition<WallRun>(CanWallRun);
+            AddTransition<Respawn>(() => { return transform.position.y < -5.0f; });
         }
 
         public override void Enter()

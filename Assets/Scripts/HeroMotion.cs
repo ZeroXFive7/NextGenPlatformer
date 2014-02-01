@@ -5,20 +5,23 @@ using HeroStates;
 
 public class HeroMotion : FSM
 {
-    [SerializeField]
     public Transform Camera;
-    [SerializeField]
     public float MaxSpeed;
-    [SerializeField]
-    public float JumpForce;
-    [SerializeField]
+    public float AccelerationTime;
+
+    public float MaxMomentum;
+
     public float Gravity;
-    [SerializeField]
     public float MaxAirSpeed;
-    [SerializeField]
     public float AirSpeed;
-    [SerializeField]
     public float MinWallRunSpeed;
+    public Vector3 RespawnPosition;
+    public float MaxJumpTime;
+
+    public float LargeJumpBound;
+
+    public float SmallJumpForce;
+    public float LargeJumpForce;
 
     protected override void FSMAwake()
     {
@@ -27,5 +30,6 @@ public class HeroMotion : FSM
         AddState<Jump>();
         AddState<ControlledFall>();
         AddState<WallRun>();
+        AddState<Respawn>();
     }
 }

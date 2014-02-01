@@ -1,62 +1,110 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public static class InputManager
+public class InputManager : MonoBehaviour
 {
-    static private int lastFrame = 0;
+    public float MinJumpTime;
 
-    static private Vector3 movementInput;
-    static public Vector3 MovementInput
+    public Vector3 MovementInput
     {
-        get
-        {
-            Update();
-            return movementInput;
-        }
+        get;
+        private set;
     }
 
-    static private Vector3 cameraInput;
-    static public Vector3 CameraInput
+    private Vector3 cameraInput;
+    public Vector3 CameraInput
     {
-        get
-        {
-            Update();
-            return cameraInput;
-        }
+        get;
+        private set;
     }
 
-    static private float jump;
-    static public float Jump
+    private float jump = 0.0f;
+    public float RawJump
     {
         get
         {
-            Update();
             return jump;
         }
     }
 
-    static private float grip;
-    static public float Grip
+    private float lastJump;
+    public float LastJump
     {
         get
         {
-            Update();
+            return lastJump;
+        }
+    }
+
+    private float jumpTime = 0.0f;
+    public float JumpTime
+    {
+        get
+        {
+            return jumpTime;
+        }
+    }
+
+    public bool JumpReleased
+    {
+        get;
+        private set;
+    }
+
+    private float grip = 0.0f;
+    public float Grip
+    {
+        get
+        {
             return grip;
         }
     }
 
-    static public void Update()
+    void Update()
     {
-        if (Time.frameCount <= lastFrame)
+        JumpReleased = false;
+
+        MovementInput = new Vector3(Input.GetAxis("Horizontal Movement"), 0.0f, Input.GetAxis("Vertical Movement"));
+        CameraInput = new Vector3(Input.GetAxis("Camera Pitch"), Input.GetAxis("Camera Yaw"), 0.0f);
+        grip = Input.GetAxis("Grip");
+
+        float newJump = Input.GetAxis("Jump");
+        if (newJump > 0.0f)
         {
-            return;
+            if (jump == 0.0f)
+            {
+                jumpTime = 0.0f;
+                lastJump = 0.0f;
+            }
+            else
+            {
+                jumpTime += Time.deltaTime;
+                lastJump = Mathf.Max(lastJump, newJump);
+
+                if (jumpTime > MinJumpTime)
+                {
+                    JumpReleased = true;
+                }
+            }            
         }
 
-        lastFrame = Time.frameCount;
-        
-        movementInput = new Vector3(Input.GetAxis("Horizontal Movement"), 0.0f, Input.GetAxis("Vertical Movement"));
-        cameraInput = new Vector3(Input.GetAxis("Camera Pitch"), Input.GetAxis("Camera Yaw"), 0.0f);
-        jump = Input.GetAxis("Jump");
-        grip = Input.GetAxis("Grip");
+        jump = newJump;
+
+        //if (newJump == 0.0f && jump > 0.0f)
+        //{
+        //    JumpReleased = true;
+        //}
+        //else if (newJump > 0.0f)
+        //{
+        //    if (jump == 0.0f)
+        //    {
+        //        jumpTime = 0.0f;
+        //    }
+        //    else
+        //    {
+        //        jumpTime += Time.deltaTime;
+        //    }
+        //}
+        //jump = newJump;
     }
 }

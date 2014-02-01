@@ -5,10 +5,12 @@ public class ThirdPersonCamera : MonoBehaviour
 {
     #region Private Variables
 
+    private InputManager InputManager;
+
     [SerializeField]
-    private float distanceBehind;
+    private Vector2 positionOffset;
     [SerializeField]
-    private float distanceAbove;
+    private float targetOffset;
     [SerializeField]
     private float smooth;
     [SerializeField]
@@ -18,18 +20,23 @@ public class ThirdPersonCamera : MonoBehaviour
 
     private Vector3 mForward = Vector3.forward;
     #endregion
-    	
+
+    void Awake()
+    {
+        InputManager = follow.parent.gameObject.GetComponent<InputManager>();
+    }
+
 	// Update is called once per frame
 	void Update()
     {
-        mForward = Quaternion.Euler(-InputManager.CameraInput.x * 3.0f, InputManager.CameraInput.y * 10.0f, 0.0f) * mForward;
+        mForward = Quaternion.Euler(/*-InputManager.CameraInput.x * 3.0f*/0.0f, InputManager.CameraInput.y * 10.0f, 0.0f) * mForward;
 	}
 
     void LateUpdate()
     {
-        targetPosition = follow.position + follow.up * distanceAbove - mForward * distanceBehind;
+        targetPosition = follow.position + Vector3.up * targetOffset + follow.up * positionOffset.y - mForward * positionOffset.x;
 
         transform.position = Vector3.Lerp(transform.position, targetPosition, Time.deltaTime * smooth);
-        transform.LookAt(follow);
+        transform.LookAt(follow.position + Vector3.up * targetOffset);
     }
 }

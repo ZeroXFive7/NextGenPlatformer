@@ -11,7 +11,7 @@ namespace HeroStates
             : base(fsm)
         {
             AddTransition<Idle>(IsIdle);
-            AddTransition<Jump>(IsJumping);
+            AddTransition<Jump>(() => { return InputManager.JumpReleased; });
             AddTransition<ControlledFall>(IsNotCollidingBelow);
             AddTransition<WallRun>(CanWallRun);
         }
@@ -24,22 +24,30 @@ namespace HeroStates
 
         public override void FixedUpdate()
         {
-            base.FixedUpdate();
-            Debug.DrawRay(transform.position, SurfaceNormal, Color.yellow);
+            // Run animation for sprint: long leaping steps.
 
+            //If player flicks joystick in a direction they will get a running start in that direction.
+            // Otherwise they will accelerate more slowly towards target velocity.
+
+            base.FixedUpdate();
+
+            // Calculate New Movement Direction.
             Vector3 cameraForward = MathHelper.ProjectVectorToPlane(Hero.Camera.forward, SurfaceNormal).normalized;
             Vector3 forwardProjection = MathHelper.ProjectVectorToPlane(Vector3.forward, SurfaceNormal).normalized;
+            
+            Vector3 targetForward = (Quaternion.FromToRotation(forwardProjection, cameraForward) * InputManager.MovementInput).normalized;
+            targetForward = MathHelper.ProjectVectorToPlane(targetForward, SurfaceNormal).normalized;
 
-            Vector3 movementForward = (Quaternion.FromToRotation(forwardProjection, cameraForward) * InputManager.MovementInput).normalized;
-            movementForward = MathHelper.ProjectVectorToPlane(movementForward, SurfaceNormal).normalized;
+            // Calculate New Rotation.
+            float rotationAngle = Vector3.Angle(forwardProjection, targetForward);
+            rotationAngle *= (Vector3.Cross(forwardProjection, targetForward).y <= 0.0f) ? -1.0f : 1.0f;
 
-            float speed = InputManager.MovementInput.sqrMagnitude;
-            rigidbody.velocity = movementForward * speed * Hero.MaxSpeed;
-            animator.SetFloat("Speed", speed);
+            Momentum = Mathf.Max(Momentum - 5.0f * Time.deltaTime * InputManager.Grip, 0.0f);
+            Momentum = Mathf.Min(Momentum + Time.deltaTime * InputManager.MovementInput.sqrMagnitude, 5.0f);
 
-            float rotationAngle = Vector3.Angle(forwardProjection, movementForward);
-            rotationAngle *= (Vector3.Cross(forwardProjection, movementForward).y <= 0.0f) ? -1.0f : 1.0f;
-
+            // Update.
+            rigidbody.velocity = targetForward * Momentum * Hero.MaxSpeed;
+            animator.SetFloat("Speed", InputManager.MovementInput.sqrMagnitude);
             transform.rotation = Quaternion.Euler(0.0f, rotationAngle, 0.0f);
         }
 
@@ -55,11 +63,6 @@ namespace HeroStates
         private bool IsIdle()
         {
             return !IsMoving();
-        }
-
-        private bool IsJumping()
-        {
-            return InputManager.Jump > 0.5f;
         }
 
         private bool IsCollidingBelow()

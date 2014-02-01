@@ -5,24 +5,35 @@ namespace HeroStates
 {
     public class Idle : HeroState
     {
+        float skidTime;
+
+        private float initialMomentum;
+        private Vector3 initialNormalVelocity;
+
         public Idle(FSM fsm)
             : base(fsm)
         {
             AddTransition<Move>(IsMoving);
-            AddTransition<Jump>(IsJumping);
+            AddTransition<Jump>(() => { return InputManager.JumpReleased; });
         }
 
         public override void Enter()
         {
             base.Enter();
+
             SurfaceLocation = UnityEngine.CollisionFlags.Below;
+            skidTime = 0.0f;
+            initialMomentum = Momentum;
         }
 
         public override void FixedUpdate()
         {
             base.FixedUpdate();
 
-            rigidbody.velocity = new Vector3(0.0f, rigidbody.velocity.y, 0.0f);
+            skidTime = Mathf.Min(skidTime + Time.deltaTime, 1.0f);
+            Momentum = Mathf.Lerp(initialMomentum, 0.0f, skidTime);
+
+            rigidbody.velocity = rigidbody.velocity.normalized * Momentum;
 
             animator.SetFloat("Speed", 0.0f);
         }
@@ -32,11 +43,6 @@ namespace HeroStates
         private bool IsMoving()
         {
             return Input.GetAxis("Horizontal Movement") != 0.0f || Input.GetAxis("Vertical Movement") != 0.0f;
-        }
-
-        private bool IsJumping()
-        {
-            return InputManager.Jump > 0.5f;
         }
 
         #endregion

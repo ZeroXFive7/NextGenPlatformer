@@ -10,13 +10,13 @@ namespace HeroStates
         public Jump(FSM fsm)
             : base(fsm)
         {
-            AddTransition<ControlledFall>(JumpEnded);
+            AddTransition<ControlledFall>(() => { return true; });
         }
 
         public override void Enter()
         {
             base.Enter();
-            animator.SetBool("Jump", true);
+            //animator.SetBool("Jump", true);
 
             SurfaceLocation = ((HeroState)PreviousState).SurfaceLocation;
         }
@@ -24,37 +24,29 @@ namespace HeroStates
         public override void Exit()
         {
             base.Exit();
-            animator.SetBool("Jump", false);
+            //animator.SetBool("Jump", false);
         }
 
         public override void FixedUpdate()
         {
-            base.FixedUpdate();
-            rigidbody.velocity += Hero.JumpForce * SurfaceNormal;
-        }
+            float jumpForce = (InputManager.LastJump < Hero.LargeJumpBound) ? Hero.SmallJumpForce : Hero.LargeJumpForce;
 
-        #endregion
+            //float jumpTime = Mathf.Min(InputManager.JumpTime / Hero.MaxJumpTime, 1.0f);
 
-        #region Transitions
+            //if (jumpTime < Hero.MediumJumpBound)
+            //{
+            //    jumpForce = Mathf.Lerp(Hero.SmallJumpForce, Hero.MediumJumpForce, (jumpTime / Hero.MediumJumpBound));
+            //}
+            //else if (jumpTime < Hero.LargeJumpBound)
+            //{
+            //    jumpForce = Mathf.Lerp(Hero.MediumJumpForce, Hero.LargeJumpForce, (jumpTime - Hero.MediumJumpBound) / (Hero.LargeJumpBound - Hero.MediumJumpBound));
+            //}
+            //else
+            //{
+            //    jumpForce = Hero.LargeJumpForce;
+            //}
 
-        private bool OneSecondElapsed()
-        {
-            return ActiveTime > 0.1f;
-        }
-
-        private bool JumpEnded()
-        {
-            return IsNotJumping() || OneSecondElapsed();
-        }
-
-        private bool IsJumping()
-        {
-            return InputManager.Jump > 0.5f;
-        }
-
-        private bool IsNotJumping()
-        {
-            return !IsJumping();
+            rigidbody.velocity += jumpForce * SurfaceNormal;
         }
 
         #endregion

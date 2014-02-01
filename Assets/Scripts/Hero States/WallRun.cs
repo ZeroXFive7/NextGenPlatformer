@@ -16,13 +16,15 @@ namespace HeroStates
         private Vector3 prevPosition;
         private float distance;
 
+        private Vector3 gravityDir;
+
         public WallRun(FSM fsm)
             : base(fsm)
         {
             // Add Transitions.
             AddTransition<Move>(() => { return InputManager.Grip < 0.25f || ((int)CollisionFlags & (int)CollisionFlags.Sides) == 0; });
-            AddTransition<Jump>(() => { return distance > maxDistance; });
-            AddTransition<Jump>(() => { return InputManager.Jump > 0.5f; });
+            //AddTransition<Jump>(() => { return distance > maxDistance; });
+            AddTransition<Jump>(() => { return InputManager.JumpReleased; });
         }
 
         public override void Enter()
@@ -42,16 +44,23 @@ namespace HeroStates
             maxDistance = 5.0f;
             distance = 0.0f;
             prevPosition = transform.position;
+
+            gravityDir = MathHelper.ProjectVectorToPlane(-Vector3.up, SurfaceNormal);
         }
 
         public override void FixedUpdate()
         {
             distance += (transform.position - prevPosition).magnitude;
             prevPosition = transform.position;
-            Debug.Log(distance);
-
+            
             base.FixedUpdate();
             animator.SetFloat("Speed", speed);
+
+            if (distance > maxDistance)
+            {
+                rigidbody.velocity += gravityDir * 0.005f * Hero.Gravity;
+                return;
+            }
 
             if (InputManager.MovementInput.sqrMagnitude > 0.1f)
             {
@@ -67,9 +76,10 @@ namespace HeroStates
                 velocityDir = Vector3.Lerp(velocityDir, inputSurfaceSpace, Time.deltaTime).normalized;
             }
 
-            rigidbody.velocity = velocityDir * speed * Hero.MaxSpeed;
+            rigidbody.velocity = velocityDir * Momentum * Hero.MaxSpeed;
 
             Debug.DrawRay(transform.position, velocityDir, Color.magenta);
+
         }
     }
 }

@@ -56,9 +56,13 @@ namespace HeroStates
             }
         }
 
+        protected float Momentum = 0.0f;
+
         protected HeroMotion Hero;
 
         protected Animator animator;
+
+        protected InputManager InputManager;
 
         #endregion
 
@@ -69,6 +73,7 @@ namespace HeroStates
         {
             Hero = (HeroMotion)fsm;
             animator = gameObject.GetComponent<Animator>();
+            InputManager = gameObject.GetComponent<InputManager>();
         }
 
         public override void Enter()
@@ -86,6 +91,7 @@ namespace HeroStates
             surfaceNormalSides = prev.surfaceNormalSides;
             CollisionFlags = prev.CollisionFlags;
             SurfaceLocation = prev.SurfaceLocation;
+            Momentum = prev.Momentum;
         }
 
         public override void Exit()
@@ -122,6 +128,7 @@ namespace HeroStates
 
         public override void FixedUpdate()
         {
+            Debug.Log("Momentum " + Momentum);
             CollisionFlags = CollisionFlags.None;
         }
         
