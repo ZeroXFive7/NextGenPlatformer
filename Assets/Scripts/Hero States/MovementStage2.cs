@@ -22,6 +22,10 @@ namespace HeroStates
             {
                 Momentum = 0.0f;
             }
+            if (inputMagnitude < 0.8f)
+            {
+                Momentum *= 0.6f;
+            }
         }
     }
 }

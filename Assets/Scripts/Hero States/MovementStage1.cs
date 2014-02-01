@@ -15,5 +15,12 @@ namespace HeroStates
             this.maxSpeed = Hero.Stage1MaxSpeed;
             this.rotationRate = 12.0f;
         }
+
+        protected override void UpdateMomentum(float directionDeltaDotProduct, float inputMagnitude)
+        {
+            base.UpdateMomentum(directionDeltaDotProduct, inputMagnitude);
+
+            Momentum = Mathf.Min(Momentum, inputMagnitude * 1.05f * Hero.Stage2MinMomentum);
+        }
     }
 }

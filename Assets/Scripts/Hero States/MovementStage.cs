@@ -34,23 +34,30 @@ namespace HeroStates
         {
             base.FixedUpdate();
 
+            // Compute target movement.
             Vector3 movementDirection = DirectionRelativeToBasisOnSurface(InputManager.MovementInput, Hero.Camera.forward, SurfaceNormal);
             Vector3 globalForward = DirectionRelativeToBasisOnSurface(Vector3.forward, Vector3.forward, SurfaceNormal);
 
+            // Update momentum.
             float inputMagnitude = InputManager.MovementInput.sqrMagnitude;
             float dot = Vector3.Dot(MathHelper.ProjectVectorToPlane(transform.forward, SurfaceNormal), movementDirection);
-
             UpdateMomentum(dot, inputMagnitude);
 
-            animator.SetFloat("Speed", Mathf.Min(inputMagnitude, this.maxAnimationSpeed));
-            Debug.Log("momentum " + Momentum);
-
+            // Update rotation.
             Quaternion rotation = Quaternion.FromToRotation(globalForward, movementDirection);
             Quaternion targetRotation = Quaternion.Euler(0.0f, rotation.eulerAngles.y, 0.0f);
             transform.localRotation = Quaternion.Lerp(transform.localRotation, targetRotation, Time.deltaTime * rotationRate);
 
+            // Update velocity.
             Speed = inputMagnitude * maxSpeed;
             rigidbody.velocity = MathHelper.ProjectVectorToPlane(transform.forward, SurfaceNormal).normalized * Speed;
+
+            // Update animation.
+            animator.SetFloat("Speed", inputMagnitude * maxAnimationSpeed);
+
+            float angle = Vector3.Angle(transform.forward, movementDirection);
+            float direction = angle * (Vector3.Cross(movementDirection, transform.forward).y >= 0.0f ? -1.0f : 1.0f) / 180.0f;
+            animator.SetFloat("Direction", direction);
         }
 
         protected virtual void UpdateMomentum(float directionDeltaDotProduct, float inputMagnitude)

@@ -16,7 +16,7 @@ namespace HeroStates
         public override void Enter()
         {
             base.Enter();
-            //animator.SetBool("Jump", true);
+            animator.SetBool("Jump", true);
 
             SurfaceLocation = ((HeroState)PreviousState).SurfaceLocation;
         }
@@ -24,7 +24,7 @@ namespace HeroStates
         public override void Exit()
         {
             base.Exit();
-            //animator.SetBool("Jump", false);
+            animator.SetBool("Jump", false);
         }
 
         public override void FixedUpdate()

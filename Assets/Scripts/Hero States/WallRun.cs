@@ -41,7 +41,7 @@ namespace HeroStates
 
             speed = InputManager.MovementInput.sqrMagnitude;
             maxAngle = 30.0f;
-            maxDistance = 5.0f;
+            maxDistance = 20.0f;
             distance = 0.0f;
             prevPosition = transform.position;
 
