@@ -5,15 +5,13 @@ namespace HeroStates
 {
     public class Idle : HeroState
     {
-        float skidTime;
-
         private float initialMomentum;
         private Vector3 initialNormalVelocity;
 
         public Idle(FSM fsm)
             : base(fsm)
         {
-            AddTransition<Move>(IsMoving);
+            AddTransition<MovementStage1>(IsMoving);
             AddTransition<Jump>(() => { return InputManager.JumpReleased; });
         }
 
@@ -22,18 +20,14 @@ namespace HeroStates
             base.Enter();
 
             SurfaceLocation = UnityEngine.CollisionFlags.Below;
-            skidTime = 0.0f;
-            initialMomentum = Momentum;
         }
 
         public override void FixedUpdate()
         {
             base.FixedUpdate();
 
-            skidTime = Mathf.Min(skidTime + Time.deltaTime, 1.0f);
-            Momentum = Mathf.Lerp(initialMomentum, 0.0f, skidTime);
-
-            rigidbody.velocity = rigidbody.velocity.normalized * Momentum;
+            Momentum = Mathf.Max(Momentum - 5.0f * Time.deltaTime, 0.0f);
+            rigidbody.velocity = Vector3.zero;
 
             animator.SetFloat("Speed", 0.0f);
         }

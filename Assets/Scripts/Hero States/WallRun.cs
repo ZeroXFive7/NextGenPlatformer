@@ -22,8 +22,8 @@ namespace HeroStates
             : base(fsm)
         {
             // Add Transitions.
-            AddTransition<Move>(() => { return InputManager.Grip < 0.25f || ((int)CollisionFlags & (int)CollisionFlags.Sides) == 0; });
-            //AddTransition<Jump>(() => { return distance > maxDistance; });
+            AddTransition<MovementStage1>(() => { return Detached() && Momentum < Hero.Stage2MinMomentum; });
+            AddTransition<MovementStage2>(() => { return Detached() && Momentum < Hero.Stage3MinMomentum; });
             AddTransition<Jump>(() => { return InputManager.JumpReleased; });
         }
 
@@ -76,10 +76,14 @@ namespace HeroStates
                 velocityDir = Vector3.Lerp(velocityDir, inputSurfaceSpace, Time.deltaTime).normalized;
             }
 
-            rigidbody.velocity = velocityDir * Momentum * Hero.MaxSpeed;
+            rigidbody.velocity = velocityDir * Speed;
 
             Debug.DrawRay(transform.position, velocityDir, Color.magenta);
+        }
 
+        private bool Detached()
+        {
+            return InputManager.Grip < 0.25f || ((int)CollisionFlags & (int)CollisionFlags.Sides) == 0;
         }
     }
 }

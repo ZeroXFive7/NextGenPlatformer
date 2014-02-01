@@ -30,22 +30,6 @@ namespace HeroStates
         public override void FixedUpdate()
         {
             float jumpForce = (InputManager.LastJump < Hero.LargeJumpBound) ? Hero.SmallJumpForce : Hero.LargeJumpForce;
-
-            //float jumpTime = Mathf.Min(InputManager.JumpTime / Hero.MaxJumpTime, 1.0f);
-
-            //if (jumpTime < Hero.MediumJumpBound)
-            //{
-            //    jumpForce = Mathf.Lerp(Hero.SmallJumpForce, Hero.MediumJumpForce, (jumpTime / Hero.MediumJumpBound));
-            //}
-            //else if (jumpTime < Hero.LargeJumpBound)
-            //{
-            //    jumpForce = Mathf.Lerp(Hero.MediumJumpForce, Hero.LargeJumpForce, (jumpTime - Hero.MediumJumpBound) / (Hero.LargeJumpBound - Hero.MediumJumpBound));
-            //}
-            //else
-            //{
-            //    jumpForce = Hero.LargeJumpForce;
-            //}
-
             rigidbody.velocity += jumpForce * SurfaceNormal;
         }
 

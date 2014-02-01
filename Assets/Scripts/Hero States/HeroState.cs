@@ -56,6 +56,8 @@ namespace HeroStates
             }
         }
 
+        protected float Speed;
+
         protected float Momentum = 0.0f;
 
         protected HeroMotion Hero;
@@ -92,6 +94,7 @@ namespace HeroStates
             CollisionFlags = prev.CollisionFlags;
             SurfaceLocation = prev.SurfaceLocation;
             Momentum = prev.Momentum;
+            Speed = prev.Speed;
         }
 
         public override void Exit()
@@ -128,10 +131,57 @@ namespace HeroStates
 
         public override void FixedUpdate()
         {
-            Debug.Log("Momentum " + Momentum);
+            //Debug.Log("Momentum " + Momentum);
             CollisionFlags = CollisionFlags.None;
         }
         
+        #endregion
+
+        #region Protected Methods
+
+        protected Vector3 DirectionRelativeToBasisOnSurface(Vector3 localDirection, Vector3 baseForward, Vector3 surfaceNormal)
+        {
+            Vector3 globalForwardSS = MathHelper.ProjectVectorToPlane(Vector3.forward, surfaceNormal).normalized;
+            Vector3 baseForwardSS = MathHelper.ProjectVectorToPlane(baseForward, surfaceNormal).normalized;
+
+            Quaternion transformToBaseSS = Quaternion.FromToRotation(globalForwardSS, baseForwardSS);
+            Vector3 relativeDirection = (transformToBaseSS * localDirection).normalized;
+
+            return MathHelper.ProjectVectorToPlane(relativeDirection, surfaceNormal).normalized;
+        }
+
+        protected bool IsMoving()
+        {
+            return Input.GetAxis("Horizontal Movement") != 0.0f || Input.GetAxis("Vertical Movement") != 0.0f;
+        }
+
+        protected bool IsIdle()
+        {
+            return !IsMoving();
+        }
+
+        protected bool IsCollidingBelow()
+        {
+            return ((int)CollisionFlags & (int)CollisionFlags.Below) != 0;
+        }
+
+        protected bool IsNotCollidingBelow()
+        {
+            return !IsCollidingBelow();
+        }
+
+        protected bool IsCollidingSides()
+        {
+            return ((int)CollisionFlags & (int)CollisionFlags.Sides) != 0;
+        }
+
+        protected bool CanWallRun()
+        {
+            return IsCollidingSides() &&
+                InputManager.Grip >= 0.25f &&
+                MathHelper.ProjectVectorToPlane(rigidbody.velocity, SurfaceNormal).sqrMagnitude > Hero.MinWallRunSpeed * Hero.MinWallRunSpeed;
+        }
+
         #endregion
 
         #region Private Methods

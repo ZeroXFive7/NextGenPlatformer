@@ -6,17 +6,23 @@ using HeroStates;
 public class HeroMotion : FSM
 {
     public Transform Camera;
-    public float MaxSpeed;
-    public float AccelerationTime;
 
-    public float MaxMomentum;
+    public float Stage1MaxSpeed;
+    public float Stage2MaxSpeed;
+    public float Stage3MaxSpeed;
+    public float Stage4MaxSpeed;
+    public float Stage5MaxSpeed;
+
+    public float Stage2MinMomentum;
+    public float Stage3MinMomentum;
 
     public float Gravity;
-    public float MaxAirSpeed;
-    public float AirSpeed;
+
     public float MinWallRunSpeed;
     public Vector3 RespawnPosition;
     public float MaxJumpTime;
+
+    public float MaxAirSpeed;
 
     public float LargeJumpBound;
 
@@ -26,7 +32,9 @@ public class HeroMotion : FSM
     protected override void FSMAwake()
     {
         AddState<Idle>(true);
-        AddState<Move>();
+        AddState<MovementStage1>();
+        AddState<MovementStage2>();
+        AddState<MovementStage3>();
         AddState<Jump>();
         AddState<ControlledFall>();
         AddState<WallRun>();

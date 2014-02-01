@@ -7,9 +7,10 @@ namespace HeroStates
     {
         #region Fields
 
-        private float maxSpeedSqr;
         private Vector3 yVelocity;
         private Vector3 xzVelocity;
+
+        private float maxSpeed;
 
         #endregion
 
@@ -18,7 +19,7 @@ namespace HeroStates
         public ControlledFall(FSM fsm)
             : base(fsm)
         {
-            AddTransition<Move>(IsCollidingBelow);
+            AddTransition<MovementStage1>(IsCollidingBelow);
             AddTransition<WallRun>(CanWallRun);
             AddTransition<Respawn>(() => { return transform.position.y < -5.0f; });
         }
@@ -29,8 +30,6 @@ namespace HeroStates
             yVelocity = new Vector3(0.0f, rigidbody.velocity.y, 0.0f);
             xzVelocity = MathHelper.ProjectVectorToPlane(rigidbody.velocity, Vector3.up);
 
-            maxSpeedSqr = Mathf.Max(xzVelocity.sqrMagnitude, Hero.MaxAirSpeed * Hero.MaxAirSpeed);
-
             SurfaceLocation = CollisionFlags.Below;
         }
 
@@ -38,30 +37,24 @@ namespace HeroStates
         {
             base.FixedUpdate();
 
-            Vector3 cameraForward = MathHelper.ProjectVectorToPlane(Hero.Camera.forward, Vector3.up);
-            cameraForward.Normalize();
+            Vector3 movementDirection = DirectionRelativeToBasisOnSurface(InputManager.MovementInput, Hero.Camera.forward, SurfaceNormal);
+            Vector3 globalForward = DirectionRelativeToBasisOnSurface(Vector3.forward, Vector3.forward, SurfaceNormal);
 
-            Vector3 movementForward = Quaternion.FromToRotation(Vector3.forward, cameraForward) * InputManager.MovementInput;
-            movementForward.Normalize();
-
-            float speed = InputManager.MovementInput.sqrMagnitude;
-
-            xzVelocity += movementForward * speed * Hero.AirSpeed * Time.deltaTime;
-            if (xzVelocity.sqrMagnitude > maxSpeedSqr)
+            xzVelocity += movementDirection * InputManager.MovementInput.sqrMagnitude * Hero.MaxAirSpeed * Time.deltaTime;
+            if (xzVelocity.sqrMagnitude > Speed * Speed)
             {
-                xzVelocity = xzVelocity.normalized * Hero.MaxAirSpeed;
+                xzVelocity = xzVelocity.normalized * Speed;
             }
 
             yVelocity -= Hero.Gravity * Vector3.up * Time.deltaTime;
 
             rigidbody.velocity = yVelocity + xzVelocity;
 
-            float rotationAngle = Vector3.Angle(Vector3.forward, movementForward);
-            rotationAngle *= (Vector3.Cross(Vector3.forward, movementForward).y <= 0.0f) ? -1.0f : 1.0f;
+            Quaternion rotation = Quaternion.FromToRotation(globalForward, movementDirection);
+            Quaternion targetRotation = Quaternion.Euler(0.0f, rotation.eulerAngles.y, 0.0f);
+            transform.localRotation = targetRotation;
 
-            transform.rotation = Quaternion.Euler(0.0f, rotationAngle, 0.0f);
-
-            animator.SetFloat("Speed", speed);
+            animator.SetFloat("Speed", 0.0f);
         }
 
         #endregion
