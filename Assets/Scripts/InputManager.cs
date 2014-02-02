@@ -19,12 +19,18 @@ public class InputManager : MonoBehaviour
     }
 
     private float jump = 0.0f;
-    public float Jump
+    public float RawJump
     {
         get
         {
             return jump;
         }
+    }
+
+    public bool JumpHeld
+    {
+        get;
+        private set;
     }
 
     public bool JumpPressed
@@ -56,9 +62,24 @@ public class InputManager : MonoBehaviour
         CameraInput = new Vector3(Input.GetAxis("Camera Pitch"), Input.GetAxis("Camera Yaw"), 0.0f);
         grip = Input.GetAxis("Grip");
 
-        float thisJump = Input.GetAxis("Jump");
-        JumpPressed = thisJump >= MinTriggerValue && jump < MinTriggerValue;
-        JumpReleased = thisJump < MinTriggerValue && jump >= MinTriggerValue;
-        jump = thisJump;
+        UpdateJump();
+    }
+
+    private float prevJump = 0.0f;
+    private float prevJumpVel = 0.0f;
+
+    private void UpdateJump()
+    {
+        float currentJump = Input.GetAxis("Jump");
+
+        float jumpVel = currentJump - prevJump;
+        float jumpAcc = jumpVel - prevJumpVel;
+
+        JumpPressed = currentJump >= MinTriggerValue && prevJump < MinTriggerValue;
+        JumpReleased = currentJump < MinTriggerValue && prevJump >= MinTriggerValue;
+        JumpHeld = (JumpHeld && jumpVel >= -0.05f) || JumpPressed;
+
+        prevJump = currentJump;
+        prevJumpVel = jumpVel;
     }
 }

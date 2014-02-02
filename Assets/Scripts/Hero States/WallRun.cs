@@ -18,13 +18,15 @@ namespace HeroStates
 
         private Vector3 gravityDir;
 
+        private float sideDirection;
+
         public WallRun(FSM fsm)
             : base(fsm)
         {
             // Add Transitions.
             AddTransition<MovementStage1>(() => { return Detached() && Momentum < Hero.Stage2MinMomentum; });
             AddTransition<MovementStage2>(() => { return Detached() && Momentum < Hero.Stage3MinMomentum; });
-            AddTransition<Jump>(() => { return InputManager.JumpPressed; });
+            AddTransition<Jump>(() => { return InputManager.JumpHeld; });
             AddTransition<UncontrolledFall>(() => { return InputManager.Grip == 0.0f; });
         }
 
@@ -47,6 +49,12 @@ namespace HeroStates
             prevPosition = transform.position;
 
             gravityDir = MathHelper.ProjectVectorToPlane(-Vector3.up, SurfaceNormal);
+
+            sideDirection = Vector3.Dot(transform.forward, SurfaceNormal) * ((Vector3.Cross(transform.forward, SurfaceNormal).y > 0) ? -1.0f : 1.0f);
+            if (Mathf.Abs(sideDirection) > 0.9f)
+            {
+                sideDirection = 0.0f;
+            }
         }
 
         public override void FixedUpdate()
@@ -56,6 +64,7 @@ namespace HeroStates
             
             base.FixedUpdate();
             animator.SetFloat("Speed", speed);
+            animator.SetFloat("Direction", sideDirection);
 
             if (distance > maxDistance)
             {

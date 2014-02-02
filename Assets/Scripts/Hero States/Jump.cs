@@ -15,7 +15,7 @@ namespace HeroStates
         public Jump(FSM fsm)
             : base(fsm)
         {
-            AddTransition<JumpFall>(() => { return InputManager.JumpReleased || jumpRemaining < 0.0f; });
+            AddTransition<JumpFall>(() => { return !InputManager.JumpHeld || jumpRemaining < 0.0f; });
         }
 
         public override void Enter()

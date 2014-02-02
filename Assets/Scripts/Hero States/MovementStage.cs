@@ -14,7 +14,7 @@ namespace HeroStates
         {
             // Add Transitions.
             AddTransition<Idle>(IsIdle);
-            AddTransition<Jump>(() => { return InputManager.JumpPressed; });
+            AddTransition<Jump>(() => { return InputManager.JumpHeld; });
             AddTransition<UncontrolledFall>(IsNotCollidingBelow);
             AddTransition<WallRun>(CanWallRun);
         }
