@@ -34,9 +34,10 @@ public class ThirdPersonCamera : MonoBehaviour
 
     void LateUpdate()
     {
-        targetPosition = follow.position + Vector3.up * targetOffset + follow.up * positionOffset.y - mForward * positionOffset.x;
+        Vector3 xzPosition = MathHelper.ProjectVectorToPlane(follow.position, Vector3.up);
+        targetPosition = xzPosition + Vector3.up * targetOffset + follow.up * positionOffset.y - mForward * positionOffset.x;
 
         transform.position = Vector3.Lerp(transform.position, targetPosition, Time.deltaTime * smooth);
-        transform.LookAt(follow.position + Vector3.up * targetOffset);
+        transform.LookAt(xzPosition + Vector3.up * targetOffset);
     }
 }

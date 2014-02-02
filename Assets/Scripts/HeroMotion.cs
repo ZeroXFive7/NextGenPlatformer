@@ -17,17 +17,16 @@ public class HeroMotion : FSM
     public float Stage3MinMomentum;
 
     public float Gravity;
+    public float JumpGravity;
 
     public float MinWallRunSpeed;
     public Vector3 RespawnPosition;
+
     public float MaxJumpTime;
 
     public float MaxAirSpeed;
 
-    public float LargeJumpBound;
-
-    public float SmallJumpForce;
-    public float LargeJumpForce;
+    public float JumpHeight;
 
     protected override void FSMAwake()
     {
@@ -36,7 +35,8 @@ public class HeroMotion : FSM
         AddState<MovementStage2>();
         AddState<MovementStage3>();
         AddState<Jump>();
-        AddState<ControlledFall>();
+        AddState<JumpFall>();
+        AddState<UncontrolledFall>();
         AddState<WallRun>();
         AddState<Respawn>();
     }

@@ -5,12 +5,17 @@ namespace HeroStates
 {
     class Jump : HeroState
     {
+        private float jumpMagnitude;
+        private float jumpRemaining;
+
+        private Vector3 initVelocity;
+
         #region Public Methods
 
         public Jump(FSM fsm)
             : base(fsm)
         {
-            AddTransition<ControlledFall>(() => { return true; });
+            AddTransition<JumpFall>(() => { return InputManager.JumpReleased || jumpRemaining < 0.0f; });
         }
 
         public override void Enter()
@@ -18,6 +23,9 @@ namespace HeroStates
             base.Enter();
             animator.SetBool("Jump", true);
 
+            jumpMagnitude = 0.0f;
+            jumpRemaining = Hero.MaxJumpTime;
+            initVelocity = rigidbody.velocity;
             SurfaceLocation = ((HeroState)PreviousState).SurfaceLocation;
         }
 
@@ -29,8 +37,18 @@ namespace HeroStates
 
         public override void FixedUpdate()
         {
-            float jumpForce = (InputManager.LastJump < Hero.LargeJumpBound) ? Hero.SmallJumpForce : Hero.LargeJumpForce;
-            rigidbody.velocity += jumpForce * SurfaceNormal;
+            jumpRemaining -= Time.deltaTime;
+
+            if (jumpMagnitude == 0.0f)
+            {
+                jumpMagnitude = Hero.JumpHeight;
+            }
+            else
+            {
+                jumpMagnitude += (Time.deltaTime / Hero.MaxJumpTime) * (jumpRemaining / Hero.MaxJumpTime) * Hero.JumpHeight;
+            }
+
+            rigidbody.velocity = initVelocity + jumpMagnitude * SurfaceNormal;
         }
 
         #endregion

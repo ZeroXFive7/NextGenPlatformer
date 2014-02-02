@@ -12,7 +12,7 @@ namespace HeroStates
             : base(fsm)
         {
             AddTransition<MovementStage1>(IsMoving);
-            AddTransition<Jump>(() => { return InputManager.JumpReleased; });
+            AddTransition<Jump>(() => { return InputManager.JumpPressed; });
         }
 
         public override void Enter()

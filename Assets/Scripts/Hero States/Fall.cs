@@ -3,24 +3,24 @@ using UnityFSM;
 
 namespace HeroStates
 {
-    class ControlledFall : HeroState
+    public class Fall : HeroState
     {
         #region Fields
 
+        protected float gravity;
+        protected float maxSpeed;
+
         private Vector3 yVelocity;
         private Vector3 xzVelocity;
-
-        private float maxSpeed;
 
         #endregion
 
         #region Public Methods
 
-        public ControlledFall(FSM fsm)
+        public Fall(FSM fsm)
             : base(fsm)
         {
             AddTransition<MovementStage1>(IsCollidingBelow);
-            AddTransition<WallRun>(CanWallRun);
             AddTransition<Respawn>(() => { return transform.position.y < -5.0f; });
         }
 
@@ -40,13 +40,13 @@ namespace HeroStates
             Vector3 movementDirection = DirectionRelativeToBasisOnSurface(InputManager.MovementInput, Hero.Camera.forward, SurfaceNormal);
             Vector3 globalForward = DirectionRelativeToBasisOnSurface(Vector3.forward, Vector3.forward, SurfaceNormal);
 
-            xzVelocity += movementDirection * InputManager.MovementInput.sqrMagnitude * Hero.MaxAirSpeed * Time.deltaTime;
+            xzVelocity += movementDirection * InputManager.MovementInput.sqrMagnitude * this.maxSpeed * Time.deltaTime;
             if (xzVelocity.sqrMagnitude > Speed * Speed)
             {
                 xzVelocity = xzVelocity.normalized * Speed;
             }
 
-            yVelocity -= Hero.Gravity * Vector3.up * Time.deltaTime;
+            yVelocity -= this.gravity * Vector3.up * Time.deltaTime;
 
             rigidbody.velocity = yVelocity + xzVelocity;
 
@@ -61,22 +61,22 @@ namespace HeroStates
 
         #region Transitions
 
-        private bool IsCollidingBelow()
+        protected bool IsCollidingBelow()
         {
             return ((int)CollisionFlags & (int)CollisionFlags.Below) != 0;
         }
 
-        private bool IsNotCollidingBelow()
+        protected bool IsNotCollidingBelow()
         {
             return !IsCollidingBelow();
         }
 
-        private bool IsCollidingSides()
+        protected bool IsCollidingSides()
         {
             return ((int)CollisionFlags & (int)CollisionFlags.Sides) != 0;
         }
-        
-        private bool CanWallRun()
+
+        protected bool CanWallRun()
         {
             return IsCollidingSides() &&
                 InputManager.Grip >= 0.25f &&

@@ -24,7 +24,8 @@ namespace HeroStates
             // Add Transitions.
             AddTransition<MovementStage1>(() => { return Detached() && Momentum < Hero.Stage2MinMomentum; });
             AddTransition<MovementStage2>(() => { return Detached() && Momentum < Hero.Stage3MinMomentum; });
-            AddTransition<Jump>(() => { return InputManager.JumpReleased; });
+            AddTransition<Jump>(() => { return InputManager.JumpPressed; });
+            AddTransition<UncontrolledFall>(() => { return InputManager.Grip == 0.0f; });
         }
 
         public override void Enter()
